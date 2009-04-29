@@ -1,0 +1,24 @@
+#!/bin/bash
+# vim: set sw=4 et sts=4 tw=80 :
+# Copyright 2009 Ali Polatel <polatel@gmail.com>
+# Distributed under the terms of the GNU General Public License v2
+
+# Hook to copy the requested zoneinfo file to /etc/localtime
+# Configuration
+ZONEINFO="Europe/Istanbul"
+
+hook_auto_names() {
+    echo merger_install_post
+}
+
+hook_run_merger_install_post() {
+    source "${PALUDIS_EBUILD_DIR}"/echo_functions.bash
+
+    if [[ "${CATEGORY}/${PN}" != "sys-libs/timezone-data" ]]; then
+        return 0
+    fi
+
+    einfo_unhooked "Copying zoneinfo file"
+    cp "${ROOT}"/usr/share/zoneinfo/"${ZONEINFO}" "${ROOT}"/etc/localtime
+}
+
