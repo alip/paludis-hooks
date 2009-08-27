@@ -3,22 +3,26 @@
 # Copyright 2009 Ali Polatel <polatel@gmail.com>
 # Distributed under the terms of the GNU General Public License v2
 
-# Hook to copy the requested zoneinfo file to /etc/localtime
-# Configuration
-ZONEINFO="Europe/Istanbul"
+# Hook to copy the appropriate zoneinfo file to /etc/localtime. The variable
+# TIMEZONE in /etc/conf.d/clock must be set, otherwise nothing will be done.
 
 hook_auto_names() {
     echo merger_install_post
 }
 
 hook_run_merger_install_post() {
-    source "${PALUDIS_EBUILD_DIR}"/echo_functions.bash
-
     if [[ "${CATEGORY}/${PN}" != "sys-libs/timezone-data" ]]; then
         return 0
     fi
 
-    einfo_unhooked "Copying zoneinfo file"
-    cp "${ROOT}"/usr/share/zoneinfo/"${ZONEINFO}" "${ROOT}"/etc/localtime
+    source "${ROOT}"/etc/conf.d/clock
+    source ${PALUDIS_ECHO_FUNCTIONS_DIR:-${PALUDIS_EBUILD_DIR}}/echo_functions.bash
+
+    if [[ -z "${TIMEZONE}" ]]; then
+        einfo_unhooked "Not copying zoneinfo file, TIMEZONE not set in /etc/conf.d/clock"
+    else
+        einfo_unhooked "Copying zoneinfo file for time zone ${TIMEZONE}"
+        cp "${ROOT}"/usr/share/zoneinfo/"${TIMEZONE}" "${ROOT}"/etc/localtime
+    fi
 }
 
